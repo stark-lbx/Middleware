@@ -1,5 +1,11 @@
 #include "timer.hpp"
 
+bool operator<(const TimerNodeBase& lhd, const TimerNodeBase& rhd) {
+    if (lhd.expire == rhd.expire)
+        return lhd.id < rhd.id;
+    return lhd.expire < rhd.expire;
+}
+
 int64_t Timer::gid = 0;
 
 int64_t Timer::GenID() { return ++gid; }
@@ -7,13 +13,13 @@ int64_t Timer::GenID() { return ++gid; }
 time_t Timer::GetTick() {
 	using namespace std::chrono;
 	/*
-	  »ñÈ¡µ±Ç°Ê±¼ä£ºsteady_clock::now()
-	  ½«Ê±¼äµã×ª»»ÎªºÁÃëÊ±¼ä£ºtime_point_cast<milliseconds>();
+	  è·å–å½“å‰æ—¶é—´ï¼šsteady_clock::now()
+	  å°†æ—¶é—´ç‚¹è½¬æ¢ä¸ºæ¯«ç§’æ—¶é—´ï¼štime_point_cast<milliseconds>();
 	*/
 	auto sc = time_point_cast<milliseconds>(steady_clock::now());
 	/*
-	  ÇóÈ¡Ê±¼ä¼ä¸ô£ºsc.time_since_epoch();
-	  ½«¼ä¸ôµÄÊ±¼ä±íÊ¾ÎªºÁÃë£ºduration_cast<milliseconds>();
+	  æ±‚å–æ—¶é—´é—´éš”ï¼šsc.time_since_epoch();
+	  å°†é—´éš”çš„æ—¶é—´è¡¨ç¤ºä¸ºæ¯«ç§’ï¼šduration_cast<milliseconds>();
 	*/
 	auto tmp = duration_cast<milliseconds>(sc.time_since_epoch());
 
@@ -25,13 +31,13 @@ TimerNodeBase Timer::AddTimer(time_t msec, TimerNode::Callback func) {
 	tnode.expire = GetTick() + msec;
 	tnode.func = func;
 	tnode.id = GenID();
-	//¼ÓÄ³¸öÊı¾İ½á¹¹ÖĞ
+	//åŠ æŸä¸ªæ•°æ®ç»“æ„ä¸­
 	timermap.insert(tnode);
 	return static_cast<TimerNodeBase>(tnode);
 }
 
 bool Timer::DelTimer(TimerNodeBase& node) {
-	//´ÓÄ³¸öÊı¾İ½á¹¹ÖĞÉ¾³ı
+	//ä»æŸä¸ªæ•°æ®ç»“æ„ä¸­åˆ é™¤
 	auto iter = timermap.find(node);
 	if (iter != timermap.end()) {
 		timermap.erase(iter);
@@ -41,11 +47,11 @@ bool Timer::DelTimer(TimerNodeBase& node) {
 }
 
 bool Timer::CheckTimer() {
-	//ÏÈÕÒµ½Ä³¸öÊı¾İ½á¹¹×îĞ¡µÄ½Úµã
-	//¸úµ±Ç°Ê±¼ä½øĞĞ±È½Ï
+	//å…ˆæ‰¾åˆ°æŸä¸ªæ•°æ®ç»“æ„æœ€å°çš„èŠ‚ç‚¹
+	//è·Ÿå½“å‰æ—¶é—´è¿›è¡Œæ¯”è¾ƒ
 	auto iter = timermap.begin();
 	if (iter != timermap.end() && iter->expire <= GetTick()) {
-		//Ã»ÓĞÈÎºÎ½Úµã
+		//æ²¡æœ‰ä»»ä½•èŠ‚ç‚¹
 		iter->func(*iter);
 		timermap.erase(iter);
 		return true;
@@ -56,7 +62,7 @@ bool Timer::CheckTimer() {
 time_t Timer::TimeToSleep() {
 	auto iter = timermap.begin();
 	if (iter == timermap.end()) {
-		//Ã»ÓĞÈÎºÎ½Úµã
+		//æ²¡æœ‰ä»»ä½•èŠ‚ç‚¹
 		return -1;
 	}
 	time_t diss = iter->expire - GetTick();
