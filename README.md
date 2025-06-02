@@ -1,2 +1,2 @@
 # Middleware
-a projectset that uses C to handwrite some middleware
+a projectset that uses C/C++ to handwrite some middlewares(Kits)
