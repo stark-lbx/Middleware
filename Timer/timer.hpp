@@ -6,33 +6,28 @@
 #include <set>
 
 struct TimerNodeBase {
-    time_t expire; //¹ıÆÚÊ±¼ä
+    time_t expire; //è¿‡æœŸæ—¶é—´
     int64_t id;
 };
-// C++14ĞÂÌØĞÔ£ºfind()´«ÈëµÄ²ÎÊı¿ÉÒÔ²»ÊÇ<T>ÖĞµÄT£¬¿ÉÒÔÊÇTÖĞÓĞĞ§±È½Ï×Ö¶Î
+// C++14æ–°ç‰¹æ€§ï¼šfind()ä¼ å…¥çš„å‚æ•°å¯ä»¥ä¸æ˜¯<T>ä¸­çš„Tï¼Œå¯ä»¥æ˜¯Tä¸­æœ‰æ•ˆæ¯”è¾ƒå­—æ®µ
 struct TimerNode : public TimerNodeBase {
     using Callback = std::function<void(const TimerNode& node)>;
-    Callback func; //»Øµ÷º¯Êı
+    Callback func; //å›è°ƒå‡½æ•°
 };
-bool operator<(const TimerNodeBase& lhd, const TimerNodeBase& rhd) {
-    if (lhd.expire == rhd.expire)
-        return lhd.id < rhd.id;
-    return lhd.expire < rhd.expire;
-}
 
 class Timer {
 public:
-    static int64_t GenID() { return ++gid; }
+    static int64_t GenID();
 
     static time_t GetTick();
 
-    //¶à¾ÃÊ±¼ä¹ıÆÚ¡¢Ö´ĞĞÊ²Ã´·½·¨
+    //å¤šä¹…æ—¶é—´è¿‡æœŸã€æ‰§è¡Œä»€ä¹ˆæ–¹æ³•
     TimerNodeBase AddTimer(time_t msec, TimerNode::Callback func);
     
     bool DelTimer(TimerNodeBase& node);
     bool CheckTimer();
 
-    //×î½ü´¥·¢µÄÊÂ¼ş
+    //æœ€è¿‘è§¦å‘çš„äº‹ä»¶
     time_t TimeToSleep();
 private:
     static int64_t gid;
