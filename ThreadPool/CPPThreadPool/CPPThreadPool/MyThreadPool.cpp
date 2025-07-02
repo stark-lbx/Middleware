@@ -37,12 +37,17 @@ void MyThreadPool::start() {
   //工作者线程执行while-loop一直工作
   for (auto& fix_worker : fixed_workers) {
     fix_worker = std::move(std::thread([this]() {
-      while (!closed.load()) {
-        auto task = this->tasks.take();
+      while (!closed.load()) {//线程池未关闭则一直loop
+        auto task = this->tasks.take(); //阻塞式take任务
+
+        //如果线程池关闭了，或者取出来的任务是空的，那么就可以退出了
         if (closed.load() || task.func == nullptr)break;
-        busyNum++;
+
+        busyNum++;//忙线程+1
+
         task.func(task.args);
-        busyNum--;
+        
+        busyNum--;//忙线程-1
       }
     }));
   }
@@ -64,6 +69,9 @@ void MyThreadPool::start() {
           dynamic_workers.emplace_back([this]() {
             while (!closed.load()) {
               auto task = this->tasks.take();
+              //如果线程池关闭了，或者取出来的任务是空的，那么就可以退出了
+              if (closed.load() || task.func == nullptr)break;
+
               busyNum++;
               task.func(task.args);
               busyNum--;
@@ -75,7 +83,7 @@ void MyThreadPool::start() {
       //销毁线程
       //忙的线程*2 < 存活的线程 and 存活的线程数大于最小的线程数
       if (busyNum * 2 < aliveNum && aliveNum > maxsize) {
-        tasks.set_cancel(DECREMENT);
+        tasks.cancel(DECREMENT);//从动态线程队列中 撤销线程
       }
     }
   }));
@@ -84,8 +92,28 @@ void MyThreadPool::start() {
 
 void MyThreadPool::stop() {
   closed.store(true);
-  //关闭入队操作
+  // 关闭队列
   tasks.close();
+
+  // 等待所有动态线程完成
+  for (auto& worker : dynamic_workers) {
+    if (worker.joinable()) {
+      worker.join();
+    }
+  }
+  dynamic_workers.clear();
+
+  // 等待所有固定线程完成
+  for (auto& worker : fixed_workers) {
+    if (worker.joinable()) {
+      worker.join();
+    }
+  }
+
+  // 等待管理线程完成
+  if (manager.joinable()) {
+    manager.join();
+  }
 }
 
 MyThreadPool::MyThreadPool(int qsize, int minsize, int maxsize)
@@ -95,26 +123,7 @@ MyThreadPool::MyThreadPool(int qsize, int minsize, int maxsize)
 }
 
 MyThreadPool::~MyThreadPool() {
-  this->stop();
-  // clear会通知所有生产者和消费者解锁，
-  // 解锁后 如果队列是关闭的 会直接从所在函数返回
-  tasks.clear();
-
-  if (manager.joinable())manager.join();
-  //std::cerr << "manager join over\n";
-
-  //保证固定的核心工作线程都回收资源
-  for (auto& worker : fixed_workers) {
-    if (worker.joinable())  worker.join();
-  }
-  //std::cerr << "fixed_worker join over\n";
-
-  //让动态分配的工作线程结束
-  for (auto& worker : dynamic_workers) {
-    tasks.set_cancel(1);
-    if (worker.joinable())worker.join();
-  }
-  //std::cerr << "dynamic_worker join over\n";
+  if (!closed.load())this->stop();
 }
 
 

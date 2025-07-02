@@ -14,7 +14,7 @@ public:
 
   void clear();//清空队列
   void close();//关闭队列--允许取出无法插入
-  void set_cancel(int num);//如果调用方不想阻塞那么多，那么取消阻塞中的num个
+  void cancel(int num);//如果调用方不想阻塞那么多，那么取消阻塞中的num个
 
   bool empty() const;
   bool full() const;
@@ -109,11 +109,11 @@ void BlockQueue<T>::close() {
 }
 
 template<class T>
-void BlockQueue<T>::set_cancel(int num) {
+void BlockQueue<T>::cancel(int num) {
   std::unique_lock<std::mutex> lock(mtx);
   cancelsize = num;
-  for (int i = 0; i < cancelsize; i++) {
-    customer.notify_one();
+  while (cancelsize > 0 && rear != head) {
+    customer.notify_one();//通知后，撤销的线程，在dead之前将cancelsize--
   }
 }
 
