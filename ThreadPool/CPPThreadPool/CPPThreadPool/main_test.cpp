@@ -12,17 +12,19 @@ void taskFunc(void* arg) {
     std::cout << "\t" << ++cnt << "=== thread is working, number=" << num
       << ", tid=" << tid << std::endl;
   }
-  std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 100 + 1));//1-100ms
+
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 1000 + 500));//1-100ms
 }
 
 
 void test_MyThreadPool() {
   std::cout << "begin test my_thread_pool" << std::endl;
-  MyThreadPool pool(100, 5, 30);
+  MyThreadPool pool(100, 10, 50);
   pool.start();
 
   std::thread th([&]() {
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 500; i++) {
       int* num = new int(i + 100);
       try {
         pool.submit(taskFunc, num);
@@ -33,7 +35,7 @@ void test_MyThreadPool() {
   });
   th.join();//将所有任务提交完
 
-  std::this_thread::sleep_for(std::chrono::seconds(3));
+  std::this_thread::sleep_for(std::chrono::seconds(10));
   pool.stop();//然后关闭线程池
 }
 

@@ -6,6 +6,8 @@
 #include <atomic>
 #include <chrono>
 #include "BlockQueue.hpp"
+#include <map>
+#include <set>
 class MyThreadPool {
 public:
   void submit(Task& task);//提交一个任务
@@ -50,6 +52,7 @@ private:
   std::thread manager;//管理者线程
   std::vector<std::thread> fixed_workers;//固定工作者线程
   std::vector<std::thread> dynamic_workers;//动态工作者线程
+  std::set<std::thread::id> shouldExit;//动态工作线程是否要关闭
 };
 
 // manager线程主要做循环检测操作

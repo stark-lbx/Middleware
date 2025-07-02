@@ -1,16 +1,8 @@
-﻿  MyThreadPool.cpp
-D:\MiddlewareWithCpp\Middleware\ThreadPool\CPPThreadPool\CPPThreadPool\MyThreadPool.h(30,21): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
-  (编译源文件“MyThreadPool.cpp”)
-  
-D:\MiddlewareWithCpp\Middleware\ThreadPool\CPPThreadPool\CPPThreadPool\MyThreadPool.h(34,20): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
-  (编译源文件“MyThreadPool.cpp”)
-  
-  main_test.cpp
-D:\MiddlewareWithCpp\Middleware\ThreadPool\CPPThreadPool\CPPThreadPool\MyThreadPool.h(30,21): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+﻿  main_test.cpp
+D:\MiddlewareWithCpp\Middleware\ThreadPool\CPPThreadPool\CPPThreadPool\MyThreadPool.h(32,21): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
   (编译源文件“main_test.cpp”)
   
-D:\MiddlewareWithCpp\Middleware\ThreadPool\CPPThreadPool\CPPThreadPool\MyThreadPool.h(34,20): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+D:\MiddlewareWithCpp\Middleware\ThreadPool\CPPThreadPool\CPPThreadPool\MyThreadPool.h(36,20): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
   (编译源文件“main_test.cpp”)
   
-  正在生成代码...
   CPPThreadPool.vcxproj -> D:\MiddlewareWithCpp\Middleware\ThreadPool\CPPThreadPool\x64\Debug\CPPThreadPool.exe
